@@ -44,40 +44,39 @@ public class SwipeDetection : MonoBehaviour
 
 
         
-       
+
+
 
 
     }
     private void Update()
     {
+
         TouchManager.instance.GetInputControls().Throw.PrimaryContact.performed += ctx => StartTouchPrimary(ctx);
         TouchManager.instance.GetInputControls().Throw.PrimaryContact.canceled += ctx => EndTouchPrimary(ctx);
-        TouchManager.instance.GetInputControls().Throw.PrimaryPosition.performed += ctx => GetTouchposition(ctx);
 
-      
 
     }
 
-   private void GetTouchposition(InputAction.CallbackContext callbackContext)
-    {
-        _touchposition = callbackContext.ReadValue<Vector2>();
-       
-
-    }
+   
 
     public void StartTouchPrimary(InputAction.CallbackContext callbackContext)
     {
+        _touchposition = TouchManager.instance.GetInputControls().Throw.PrimaryPosition.ReadValue<Vector2>();   
         _swipestartposition = _touchposition;
+       // Debug.Log("Start " + _touchposition);
        
        
     }
 
     public void EndTouchPrimary(InputAction.CallbackContext callbackContext)
     {
+        _touchposition = TouchManager.instance.GetInputControls().Throw.PrimaryPosition.ReadValue<Vector2>();
         _swipeendposition = _touchposition;
+       // Debug.Log("End" + _touchposition);
         DetectSwipe();
-
-        Debug.Log("Start" + DetectSwipe());
+        Debug.Log("Swipee" + DetectSwipe());
+        
 
 
     }
@@ -125,7 +124,7 @@ public class SwipeDetection : MonoBehaviour
 
     public void ResetSwipeParametres()
     {
-        _swipeendposition = _swipestartposition = Vector2.zero;
+        _touchposition =_swipeendposition = _swipestartposition = Vector2.zero;
         _currentswipedirection = SwipeDirection.None;
         _currentquadrant = Quadrants.None;
         
@@ -158,7 +157,7 @@ public class SwipeDetection : MonoBehaviour
                     _currentswipedirection = SwipeDirection.Down;
             }
 
-            Debug.Log("Swipe Direction: " + _currentswipedirection);
+            
         }
         else
         {
@@ -166,5 +165,7 @@ public class SwipeDetection : MonoBehaviour
         }
 
         return _currentswipedirection;
+        
+
     }
 }

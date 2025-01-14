@@ -23,8 +23,8 @@ public class TouchManager : MonoBehaviour
         instance = this;
         _Player = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
         _inputControl = new InputControls();
-        _inputControl.Player.Disable(); // Enable the Player action map by default
-        _inputControl.Throw.Enable();
+        _inputControl.Player.Enable(); // Enable the Player action map by default
+        _inputControl.Throw.Disable();
 
         _playerinput = gameObject.GetComponent<PlayerInput>();
 
@@ -54,7 +54,7 @@ public class TouchManager : MonoBehaviour
             if (SwipeDetection.instance.CheckSwipeQuadrants(SwipeDetection.Quadrants.Right))
             {
                 
-                //ThrowProjectile();
+                ThrowProjectile();
             }
            
         }
@@ -109,17 +109,17 @@ public class TouchManager : MonoBehaviour
     {
 
        
-        if ( SwipeDetection.instance.DetectSwipe() == SwipeDetection.SwipeDirection.Up)
+       if ( SwipeDetection.instance.DetectSwipe() == SwipeDetection.SwipeDirection.Up)
         {
             InventoryManager.instance.RemoveFromInventory();
             SwipeDetection.instance.ResetSwipeParametres();
             SwitchActionMap(_inputControl.Player); 
             PlayerController.instance.HideAim();
+            Debug.Log("Fire");
         }
 
 
-
-
+        
     }
 
 

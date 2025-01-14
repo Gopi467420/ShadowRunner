@@ -92,8 +92,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f52958d9a1f4c0146b6003b971dab202, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _resourcename: {fileID: 6379276476464702693}
-  _resourcequantity: {fileID: 5354842275004674497}
+  _resourcename: {fileID: 1283402227523888362}
+  _resourcequantity: {fileID: 2917027098467785087}
 --- !u!114 &779770271052687880
 MonoBehaviour:
   m_ObjectHideFlags: 0
