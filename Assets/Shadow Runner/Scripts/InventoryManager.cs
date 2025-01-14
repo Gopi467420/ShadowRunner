@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
+
+    public static InventoryManager instance;
+
     public GameObject _InventoryItem;
     GameObject _plankresourceui;
     GameObject _stoneresourceui;
@@ -11,12 +14,16 @@ public class InventoryManager : MonoBehaviour
     InventoryItemUI _plank;
     InventoryItemUI _stone;
 
+    private string _itemtoremovefrominventory;
+
     // Use a List or Dictionary to store items
     private List<InventoryItemUI> Inventory = new List<InventoryItemUI>();
 
     // Start is called once before the first execution of Update
     void Start()
     {
+
+        instance = this;
         // Hide the inventory at the start
         gameObject.SetActive(false);
 
@@ -87,6 +94,20 @@ public class InventoryManager : MonoBehaviour
         gameObject.SetActive(hasItems);
     }
 
+    public void SetItemToRemoveFromInventory(string _removitem) { _itemtoremovefrominventory = _removitem; }
+    public void RemoveFromInventory()
+    {
+        if(_itemtoremovefrominventory == "Plank")
+        {
+            _plank.SetResourceQuantity(_plank.GetResourceQuantity() - 1);
+        }
+        else if(_itemtoremovefrominventory == "Stone")
+        {
+            _stone.SetResourceQuantity(_stone.GetResourceQuantity() - 1);
+        }
 
+        UpdateInventory();
+        _itemtoremovefrominventory = "";
+    }
 
 }

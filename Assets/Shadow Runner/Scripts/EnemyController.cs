@@ -35,11 +35,10 @@ public class EnemyController : MonoBehaviour
 
     private PlayerController _player;
     private GameManager _gamemanager;
-    private Vector3 _initialposition;
-    private Vector3 _patrolTarget;
+    private Vector3 _initialposition, _patrolTarget;
+   
 
-    private bool _movingTowardsTarget = true;
-
+    
     private int _idledelay;
 
     public GameObject _TEMPTEXT;
@@ -224,11 +223,10 @@ public class EnemyController : MonoBehaviour
     }
 
     public bool GetPlayerInZone() {  return _playerinzone; }
-    public bool GetHitplayer() { return _attackplayer; }
-    public bool GetCanAttack() { return _canattack; }
+   
     public EnemyState GetCurrentState() { return _currentenemystate; }
     public void SetPlayerInZone(bool alert) { _playerinzone = alert; }
-    public void SetHitplayer(bool hitplayer) { _attackplayer = hitplayer; }
+   
     public void SetCurrentState(EnemyState newstate) { _currentenemystate = newstate; }
     
     

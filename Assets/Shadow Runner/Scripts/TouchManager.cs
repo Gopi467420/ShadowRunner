@@ -1,48 +1,75 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.OnScreen;
+using UnityEngine.Rendering;
 
 public class TouchManager : MonoBehaviour
 {
     private InputControls _inputControl;
     public Camera mainCamera;
-    private GameObject _Player;
+    private PlayerController _Player;
     public InventoryManager _inventorymanager;
-    private bool isSubscribed = false;
 
-    
+    public static TouchManager instance;
+
+
+    private PlayerInput _playerinput;
+
+
 
     private void Start()
     {
-        _Player = GameObject.FindWithTag("Player");
+
+        instance = this;
+        _Player = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
         _inputControl = new InputControls();
         _inputControl.Player.Disable(); // Enable the Player action map by default
         _inputControl.Throw.Enable();
+
+        _playerinput = gameObject.GetComponent<PlayerInput>();
+
+
+
+        
+        
+
+
+
     }
 
     private void Update()
     {
-               
-        // Ensure subscriptions for the Collect action
-        if (_inputControl.Player.enabled && !isSubscribed)
+        if (_inputControl.Player.enabled)
         {
-            _inputControl.Player.Collectresource.performed += OnCollectResource;
-            isSubscribed = true;
+            PlayerController.instance.MovePlayer(_inputControl.Player.PlayerMovement.ReadValue<Vector2>());
+            _inputControl.Player.Collectresource.performed += ctx => OnCollectResource(ctx);
+
         }
-        else if (!_inputControl.Player.enabled && isSubscribed)
+        else if(_inputControl.Throw.enabled) 
         {
-            _inputControl.Player.Collectresource.performed -= OnCollectResource;
-            isSubscribed = false;
+            PlayerController.instance.AimProjectile(_inputControl.Throw.ProjectileSetdestination.ReadValue<Vector2>());
+            
+            
+
+            if (SwipeDetection.instance.CheckSwipeQuadrants(SwipeDetection.Quadrants.Right))
+            {
+                
+                //ThrowProjectile();
+            }
+           
         }
+        
     }
 
+
+    
     public InputControls GetInputControls()
     {
         return _inputControl;
     }
 
     // Collect resource on click
-    private void OnCollectResource(InputAction.CallbackContext context)
+    public void OnCollectResource(InputAction.CallbackContext context)
     {
         if (context.phase == InputActionPhase.Performed)
         {
@@ -60,11 +87,12 @@ public class TouchManager : MonoBehaviour
                     {
                         _inventorymanager.gameObject.SetActive(true);
                         _inventorymanager.AddtoInventory(hit.collider.gameObject);
+                        
                     }
                 }
                 else
                 {
-                   // Debug.Log("Raycast didn't hit any objects.");
+                    // Debug.Log("Raycast didn't hit any objects.");
                 }
             }
             else
@@ -74,14 +102,26 @@ public class TouchManager : MonoBehaviour
         }
     }
 
-    private void OnDisable()
+    
+   
+    //public void AimProjectile(InputAction.CallbackContext context) { PlayerController.instance.AimProjectile(context.ReadValue<Vector2>()); }
+    public void ThrowProjectile()
     {
-        if (isSubscribed)
+
+       
+        if ( SwipeDetection.instance.DetectSwipe() == SwipeDetection.SwipeDirection.Up)
         {
-            _inputControl.Player.Collectresource.performed -= OnCollectResource;
-            isSubscribed = false;
+            InventoryManager.instance.RemoveFromInventory();
+            SwipeDetection.instance.ResetSwipeParametres();
+            SwitchActionMap(_inputControl.Player); 
+            PlayerController.instance.HideAim();
         }
+
+
+
+
     }
+
 
     public void SwitchActionMap(InputActionMap actionMap)
     {
@@ -90,12 +130,15 @@ public class TouchManager : MonoBehaviour
         {
             _inputControl.Throw.Enable();
             _inputControl.Player.Disable();
+
+
         }
         
         else if (_inputControl.asset.FindActionMap("Player") == actionMap)
         {
             _inputControl.Throw.Disable();
             _inputControl.Player.Enable();
+
         }
     }
 
