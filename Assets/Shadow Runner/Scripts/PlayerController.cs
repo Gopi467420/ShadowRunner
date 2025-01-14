@@ -27,8 +27,12 @@ public class PlayerController : MonoBehaviour
     private bool isHidden = false;
     private RectTransform _healthbar;
 
+    public static PlayerController instance;
+
     void Start()
     {
+
+        instance = this;    
         // Initialize health and states
         health = 5;
         _initialposition = transform.position;
@@ -37,27 +41,15 @@ public class PlayerController : MonoBehaviour
         _currentstate = PlayerState.visible;
 
         _healthbar = GameObject.FindWithTag("Healthbar")?.GetComponent<RectTransform>();
-        if (_healthbar == null)
-        {
-            Debug.LogError("Healthbar not found! Ensure the Healthbar is tagged correctly.");
-        }
+        
 
         _playerrigidbody = GetComponent<Rigidbody>();
-        if (_playerrigidbody == null)
-        {
-            Debug.LogError("Player Rigidbody is not assigned!");
-        }
+       
 
         _touchManager = FindAnyObjectByType<TouchManager>();
-        if (_touchManager == null)
-        {
-            Debug.LogError("TouchManager not found in the scene!");
-        }
+        
 
-        if (_throwdestinationrigidbody == null)
-        {
-            Debug.LogError("Throw Destination Rigidbody is not assigned! Please assign it in the Inspector.");
-        }
+       
 
         
     }
@@ -76,86 +68,42 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
+  
+
+    public void MovePlayer(Vector2 _moveinput)
     {
-        if (_touchManager.GetInputControls().Player.enabled)
-        {
-            MovePlayer();
-            // Subscribe to player movement input actions
-            _touchManager.GetInputControls().Player.PlayerMovement.performed += OnMovementPerformed;
-            _touchManager.GetInputControls().Player.PlayerMovement.canceled += OnMovementCanceled;
-
-            // Unsubscribe from throw movement
-            _touchManager.GetInputControls().Throw.ProjectileSetdestination.performed -= OnMovementPerformed;
-            _touchManager.GetInputControls().Throw.ProjectileSetdestination.canceled -= OnMovementCanceled;
-        }
-        else if (_touchManager.GetInputControls().Throw.enabled)
-        {
-            AimProjectile();
-            ThrowProjectile();
-            
-
-            // Subscribe to throw movement
-            _touchManager.GetInputControls().Throw.ProjectileSetdestination.performed += OnMovementPerformed;
-            _touchManager.GetInputControls().Throw.ProjectileSetdestination.canceled += OnMovementCanceled;
-
-            // Unsubscribe from player movement input actions
-            _touchManager.GetInputControls().Player.PlayerMovement.performed -= OnMovementPerformed;
-            _touchManager.GetInputControls().Player.PlayerMovement.canceled -= OnMovementCanceled;
-        }
-    }
-
-    private void MovePlayer()
-    {
-        if (_playerrigidbody == null || _throwdestinationrigidbody == null) return;
-
+        
         // Movement logic for player
-        Vector3 movement = new Vector3(moveInput.x, 0f, moveInput.y).normalized * moveSpeed;
-        _playerrigidbody.linearVelocity = new Vector3(movement.x, _playerrigidbody.linearVelocity.y, movement.z);
+        Vector3 movement = new Vector3(_moveinput.x, 0f, _moveinput.y).normalized * moveSpeed;
 
-        // Hide the destination movement
-        AimProjectile();
+        transform.Translate(movement * Time.fixedDeltaTime);
+        
+
         _throwdestinationrigidbody.gameObject.SetActive(false);
     }
 
-    public void AimProjectile()
+    public void AimProjectile(Vector2  _moveinput)
     {
-        
         // Movement logic
-        Vector3 movement = new Vector3(moveInput.x, 0f, moveInput.y).normalized * moveSpeed;
+        Vector3 movement = new Vector3(_moveinput.x, 0f, _moveinput.y).normalized * moveSpeed;
         _throwdestinationrigidbody.linearVelocity = new Vector3(movement.x, _playerrigidbody.linearVelocity.y, movement.z);
-        _throwdestinationrigidbody.gameObject.SetActive(true);
-        //SwipeDetection.instance.SetCurrentSwipeDirection(SwipeDetection.SwipeDirection.None);
-
        
     }
 
-    public void ThrowProjectile()
-    {
-       // if (SwipeDetection.instance.DetectSwipe() == SwipeDetection.SwipeDirection.Up)
-        {
-            Debug.Log("Throw action triggered!");
-            //_touchManager.SwitchActionMap(_touchManager.GetInputControls().Player);
-        }
-    }
+   public void ShowAim() { _throwdestinationrigidbody.gameObject.SetActive(true); }
 
-    // Capture movement input
-    private void OnMovementPerformed(InputAction.CallbackContext context)
-    {
-        // Get the movement input from the action context
-        moveInput = context.ReadValue<Vector2>();
-    }
+   public void HideAim() { _throwdestinationrigidbody.gameObject.SetActive(false); }
+    
 
-    // Reset movement input when canceled
-    private void OnMovementCanceled(InputAction.CallbackContext context)
-    {
-        moveInput = Vector2.zero;
-    }
+   
+    private void OnMovementPerformed(InputAction.CallbackContext context) { moveInput = context.ReadValue<Vector2>(); }   
+    private void OnMovementCanceled(InputAction.CallbackContext context) { moveInput = Vector2.zero; }
+   
 
     void Hidden()
     {
         // Switch to hidden state
-        originalstate.SetActive(false);
+        originalstate.SetActive(false);      
         hiddenstate.SetActive(true);
     }
 
@@ -166,31 +114,10 @@ public class PlayerController : MonoBehaviour
         hiddenstate.SetActive(false);
     }
 
-    public void SetCurrentState(PlayerState state)
-    {
-        _currentstate = state;
-    }
-
-    public bool GetIsHidden()
-    {
-        return isHidden;
-    }
-
-    public void SetIsHidden(bool hidden)
-    {
-        isHidden = hidden;
-    }
-
-    public Vector3 GetInitialPosition()
-    {
-        return _initialposition;
-    }
-
-    public int GetHealth()
-    {
-        return health;
-    }
-
+    public void SetCurrentState(PlayerState state) { _currentstate = state; }
+    
+    public int GetHealth() { return health; }
+    
     public void TakeDamage(int damageAmount)
     {
         health -= damageAmount;
